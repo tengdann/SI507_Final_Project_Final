@@ -48,7 +48,7 @@ def add_to_db():
 # DEPENDENCIES: nothing
 def selenium_cache(url):
     # Connect to the DBNAME
-    conn.connect(DBNAME)
+    conn = sqlite.connect(DBNAME)
     cur = conn.cursor()
     
     statement = '''
@@ -57,12 +57,12 @@ def selenium_cache(url):
     cur.execute(statement, (url,))
     exists = cur.fetchone()
     
-    if exists:
+    if exists[0]:
         statement = '''
             SELECT html FROM Cache WHERE url = ?
         '''
         cur.execute(statement, (url,))
-        html = cur.fetchone()
+        html = cur.fetchone()[0]
     else:
         # Launch url
         driver = webdriver.Chrome('./final_project/chromedriver-Windows')
@@ -96,10 +96,14 @@ def scrape_page(url):
     
     # Find tags
     tags = []
-    tags_temp = soup.find_all('li', {'class': 'tags-list__tags', 'data-entityid': 'topic_link_bottom'})
-    for tag in tags_temp:
-        tags.append(tag.find('a').text)
-
-    driver.quit()
+    try:
+        tags_temp = soup.find_all('li', {'class': 'tags-list__tags', 'data-entityid': 'topic_link_top'})
+        for tag in tags_temp:
+            tags.append(tag.find('a').text)
+    except:
+        pass
     
     return (date, region, tags)
+    
+scrape_page(test_url1)
+scrape_page(test_url2)

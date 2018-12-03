@@ -7,7 +7,7 @@ DBNAME = 'final_project.sqlite3'
 # EFFECTS: drops existing DB tables and creates new ones
 # DEPENDENCIES: nothing
 def create_tables():
-    conn.connect(DBNAME)
+    conn = sqlite.connect(DBNAME)
     cur = conn.cursor()
     
     # Drop tables :(
@@ -44,11 +44,29 @@ def create_tables():
     cur.execute(statement)
     
     statement = '''
-        CREAT TABLE Articles (
+        CREATE TABLE Articles (
             id INTEGER PRIMARY KEY,
             author TEXT,
             title TEXT UNIQUE,
+            region_id INTEGER,
+            tag_id INTEGER,
+            url TEXT
         )
+    '''
+    cur.execute(statement)
+    
+    statement = '''
+        CREATE TABLE Tags (
+            id INTEGER PRIMARY KEY,
+            tag TEXT UNIQUE
+        )
+    '''
+    cur.execute(statement)
+    
+    statement = '''
+        CREATE TABLE Regions (
+            id INTEGER PRIMARY KEY,
+            tag TEXT UNIQUE
     '''
     
 
