@@ -1,6 +1,5 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from webdriver_manager.chrome import ChromeDriverManager
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -12,8 +11,8 @@ api_key = news_api_key
 api_baseurl = 'https://newsapi.org/v2/everything?'
 DBNAME = 'final_project.sqlite'
 
-# This is outside the function to prevent the debug statement from printing each time
-driver = webdriver.Chrome(ChromeDriverManager().install())
+test_url1 = 'https://www.bbc.com/news/uk-england-bristol-46420317'
+test_url2 = 'https://www.bbc.com/news/world-us-canada-46421177'
 
 # REQUIRES: api_baseurl is a valid API url, and params is a dictionary w/ valid key/value pairs for said API
 # MODIFIES: nothing
@@ -22,14 +21,12 @@ driver = webdriver.Chrome(ChromeDriverManager().install())
 def generate_url(baseurl, params):
     url = baseurl
     for key in params:
-        if key != params.keys()[-1]:
+        if key != list(params.keys())[-1]:
             url += key + '=' + params[key] + '&'
         else:
             url += key + '=' + params[key]
     
     return url
-    
-print(generate_url(baseurl, {'sources': 'bbc-news', 'apiKey': api_key})
 
 # REQUIRES: api_baseurl is a valid API url and params is a dictionary w/ valid key/value pairs for said API
 # MODIFIES: the DBNAME
@@ -51,7 +48,7 @@ def add_to_cache(input):
 # DEPENDENCIES: nothing
 def scrape_page(url):
     # Launch url
-    driver.implicitly_wait(5)
+    driver = webdriver.Chrome('./final_project/chromedriver-Windows')
     driver.get(url)
     
     # Pass-off to BeautifulSoup    
@@ -59,14 +56,17 @@ def scrape_page(url):
     
     # Date published
     date = soup.find('div', {'class': 'date date--v2 relative-time'})['data-datetime']
+    print(date)
     
     # Region
     region = soup.find('div', {'class': 'secondary-navigation secondary-navigation--wide'}).find('span').text
+    print(region)
     
     # Find tags
     tags = []
     tags_temp = soup.find_all('li', {'class': 'tags-list__tags', 'data-entityid': 'topic_link_bottom'})
     for tag in tags_temp:
         tags.append(tag.find('a').text)
+    print(tags)
 
-driver.quit()   
+    driver.quit()
