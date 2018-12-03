@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import requests
+import json
 from bs4 import BeautifulSoup
 import re
 import os
@@ -31,16 +32,38 @@ def generate_url(baseurl, params):
 # REQUIRES: api_baseurl is a valid API url and params is a dictionary w/ valid key/value pairs for said API
 # MODIFIES: the DBNAME
 # EFFECTS: gets articles from specified website utilizing the cache
-# DEPENDENCIES: generate_url(), add_to_db()
+# DEPENDENCIES: generate_url(), add_to_db(), scrape_page
 def get_from_api(baseurl, params):
-    pass
+    print('WARNING: THIS WILL DO A NEW QUERY TO THE API')
+    print('OTHERWISE THERE WOULD BE NO UPDATED STORIES')
+    
+    articles = json.loads(requests.get(generate_url(baseurl, params)).text)
+
+    for article in articles['articles']:
+        # We only want news articles; sports pages are formatted differently
+        if 'news' in article['url']:
+            page_stuff = scrape_page(article['url'])
+            
+            # Get author from API; if facebook link set to Unknown'
+            author = 'Unknown'
+            if 'facebook' not in article['author'] and article['author'] not None:
+                author = article['author']
+                
+            title = article['title']
+            url = article['url']
+            
+        to_insert = (author, title, page_stuff[0], page_stuff[1], page_stuff[2], url)
+        
+    
+get_from_api(api_baseurl, {'sources': 'bbc-news', 'apiKey': api_key})
  
-# REQUIRES: nothing
+# REQUIRES: values is a valid tuple 
 # MODIFIES: the DBNAME
 # EFFECTS: adds information to the database
 # DEPENDENCIES: nothing 
-def add_to_db():
-    pass
+def add_to_db(values):
+    conn = sqlite.connect(DBNAME)
+    cur = conn.cursor()
 
 # REQUIRES: input is a dictionary for a single article
 # MODIFIES: the DBNAME
@@ -89,10 +112,16 @@ def scrape_page(url):
     soup = BeautifulSoup(selenium_cache(url), 'html.parser')
     
     # Date published
-    date = soup.find('div', {'class': 'date date--v2 relative-time'})['data-datetime']
+    try:
+        date = soup.find('div', {'class': 'date date--v2 relative-time'})['data-datetime']
+    except:
+        date = 'N/A'
     
     # Region
-    region = soup.find('div', {'class': 'secondary-navigation secondary-navigation--wide'}).find('span').text
+    try:
+        region = soup.find('div', {'class': 'secondary-navigation secondary-navigation--wide'}).find('span').text
+    except:
+        region = 'Unknown'
     
     # Find tags
     tags = []
@@ -104,6 +133,3 @@ def scrape_page(url):
         pass
     
     return (date, region, tags)
-    
-scrape_page(test_url1)
-scrape_page(test_url2)

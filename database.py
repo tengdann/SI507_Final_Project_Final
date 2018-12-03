@@ -31,6 +31,11 @@ def create_tables():
     '''
     cur.execute(statement)
     
+    statement = '''
+        DROP TABLE IF EXISTS Authors
+    '''
+    cur.execute(statement)
+    
     conn.commit()
     
     # Create tables
@@ -46,8 +51,9 @@ def create_tables():
     statement = '''
         CREATE TABLE Articles (
             id INTEGER PRIMARY KEY,
-            author TEXT,
+            author_id INTEGER,
             title TEXT UNIQUE,
+            date TEXT,
             region_id INTEGER,
             tag_id INTEGER,
             url TEXT
@@ -66,10 +72,46 @@ def create_tables():
     statement = '''
         CREATE TABLE Regions (
             id INTEGER PRIMARY KEY,
-            tag TEXT UNIQUE
+            region TEXT UNIQUE
+        )
     '''
+    cur.execute(statement)
     
+    statement = '''
+        CREATE TABLE Authors (
+            id INTEGER PRIMARY KEY,
+            author TEXT UNIQUE
+        )
+    '''
+    cur.execute(statement)
+    
+    conn.commit()
+    conn.close()
+
+def pop_tables():
+    conn = sqlite.connect(DBNAME)
+    cur = conn.cursor()
+    
+    statement = '''
+        INSERT INTO Tags (tag) VALUES (?)
+    '''
+    cur.execute(statement, ('None',))
+    
+    statement = '''
+        INSERT INTO Regions (region) VALUES (?)
+    '''
+    cur.execute(statement, ('Unknown',))
+    
+    statement = '''
+        INSERT INTO Authors (author) VALUES (?)
+    '''
+    cur. execute(statement, ('Unknown',))
+    
+    conn.commit()
+    conn.close()
 
 if __name__ == '__main__':
     create_tables()
-    print('Tables created successfully!')
+    print('Tables re-created successfully!')
+    pop_tables()
+    print('Null values established!')
