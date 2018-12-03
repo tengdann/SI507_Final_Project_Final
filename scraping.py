@@ -39,23 +39,21 @@ def get_from_api(baseurl, params):
     
     articles = json.loads(requests.get(generate_url(baseurl, params)).text)
 
-    for article in articles['articles']:
+    for article in articles['articles'][:1]:
         # We only want news articles; sports pages are formatted differently
         if 'news' in article['url']:
             page_stuff = scrape_page(article['url'])
             
             # Get author from API; if facebook link set to Unknown'
             author = 'Unknown'
-            if 'facebook' not in article['author'] and article['author'] not None:
+            if 'facebook' not in article['author'] and article['author'] is not None:
                 author = article['author']
                 
             title = article['title']
             url = article['url']
             
         to_insert = (author, title, page_stuff[0], page_stuff[1], page_stuff[2], url)
-        
-    
-get_from_api(api_baseurl, {'sources': 'bbc-news', 'apiKey': api_key})
+        add_to_db(to_insert)
  
 # REQUIRES: values is a valid tuple 
 # MODIFIES: the DBNAME
@@ -64,6 +62,18 @@ get_from_api(api_baseurl, {'sources': 'bbc-news', 'apiKey': api_key})
 def add_to_db(values):
     conn = sqlite.connect(DBNAME)
     cur = conn.cursor()
+    
+    statement = '''
+        INSERT OR IGNORE INTO Authors (author) VALUES (?);
+    '''
+    cur.execute(statement, (values[0]))
+    
+    statement = '''
+        SELECT id FROM Authors WHERE author = ?
+    '''
+    cur.execute(statement, (values[0]))
+    author_id = cur.fetchone()[0]
+    print(author_id)
 
 # REQUIRES: input is a dictionary for a single article
 # MODIFIES: the DBNAME
@@ -133,3 +143,9 @@ def scrape_page(url):
         pass
     
     return (date, region, tags)
+    
+    
+if __name__ == '__main__':
+    params = {'sources': 'bbc-news', 'apiKey': api_key}
+    get_from_api(api_baseurl, params)
+    print('Data successfully scraped!')
