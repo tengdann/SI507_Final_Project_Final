@@ -37,6 +37,13 @@ def get_from_api(baseurl, params):
     print('WARNING: THIS WILL DO A NEW QUERY TO THE API')
     print('OTHERWISE THERE WOULD BE NO UPDATED STORIES')
     
+    # Selenium stuff
+    driver = webdriver.Chrome('./final_project/chromedriver-Windows')
+    
+    # SQLite stuff
+    conn = sqlite.connect(DBNAME)
+    cur = conn.cursor()
+    
     articles = json.loads(requests.get(generate_url(baseurl, params)).text)
 
     for article in articles['articles']:
@@ -54,6 +61,11 @@ def get_from_api(baseurl, params):
             
         to_insert = (author, title, page_stuff[0], page_stuff[1], page_stuff[2], url)
         add_to_db(to_insert, cur)
+        
+        conn.commit()
+        
+    conn.close()
+    driver.quit()
  
 # REQUIRES: values is a valid tuple 
 # MODIFIES: the DBNAME
@@ -155,7 +167,7 @@ def selenium_cache(url, driver, cur):
 # EFFECTS: returns formatted information for db insertions
 # DEPENDENCIES: selenium_cache
 def scrape_page(url, driver, cur):  
-    soup = BeautifulSoup(selenium_cache(url, driver, url), 'html.parser')
+    soup = BeautifulSoup(selenium_cache(url, driver, cur), 'html.parser')
     
     # Date published
     try:
@@ -177,7 +189,7 @@ def scrape_page(url, driver, cur):
     
     # Find tags
     try:
-        tag = soup.find('li', {'class': 'tags-list__tags', 'data-entityid': 'topic_link_top'})
+        tag = soup.find('li', {'class': 'tags-list__tags', 'data-entityid': 'topic_link_top'}).find('a').text
     except:
         tag = 'Unknown'
     # HTML why
