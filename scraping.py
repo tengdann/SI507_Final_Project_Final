@@ -39,10 +39,10 @@ def get_from_api(baseurl, params):
     
     articles = json.loads(requests.get(generate_url(baseurl, params)).text)
 
-    for article in articles['articles'][:1]:
+    for article in articles['articles']:
         # We only want news articles; sports pages are formatted differently
         if 'news' in article['url']:
-            page_stuff = scrape_page(article['url'])
+            page_stuff = scrape_page(article['url'], driver, cur)
             
             # Get author from API; if facebook link set to Unknown'
             author = 'Unknown'
@@ -53,36 +53,72 @@ def get_from_api(baseurl, params):
             url = article['url']
             
         to_insert = (author, title, page_stuff[0], page_stuff[1], page_stuff[2], url)
-        add_to_db(to_insert)
+        add_to_db(to_insert, cur)
  
 # REQUIRES: values is a valid tuple 
 # MODIFIES: the DBNAME
 # EFFECTS: adds information to the database
 # DEPENDENCIES: nothing 
-def add_to_db(values):
-    conn = sqlite.connect(DBNAME)
-    cur = conn.cursor()
+def add_to_db(values, cur):
+    # conn = sqlite.connect(DBNAME)
+    # cur = conn.cursor()
     
+    # Insert and get author_id
     statement = '''
         INSERT OR IGNORE INTO Authors (author) VALUES (?);
     '''
-    cur.execute(statement, (values[0]))
+    cur.execute(statement, (values[0],))
     
     statement = '''
         SELECT id FROM Authors WHERE author = ?
     '''
-    cur.execute(statement, (values[0]))
+    cur.execute(statement, (values[0],))
     author_id = cur.fetchone()[0]
-    print(author_id)
+    
+    # Insert and get region_id
+    statement = '''
+        INSERT OR IGNORE INTO Regions (region) VALUES (?);
+    '''
+    cur.execute(statement, (values[3],))
+    
+    statement = '''
+        SELECT id FROM Regions WHERE region = ?
+    '''
+    cur.execute(statement, (values[3],))
+    region_id = cur.fetchone()[0]
+    
+    # Insert and get tag_id
+    statement = '''
+        INSERT OR IGNORE INTO Tags (tag) VALUES (?);
+    '''
+    cur.execute(statement, (values[4],))
+    
+    statement = '''
+        SELECT id FROM Tags WHERE tag = ?
+    '''
+    cur.execute(statement, (values[4],))
+    tag_id = cur.fetchone()[0]
+    
+    # Insert or replace into article
+    statement = '''
+        WITH new (author_id, title, [date], region_id, tag_id, url) AS ( VALUES(?, ?, ?, ?, ?, ?) )
+            INSERT OR REPLACE INTO Articles (id, author_id, title, [date], region_id, tag_id, url)
+            SELECT old.id, new.author_id, new.title, new.[date], new.region_id, new.tag_id, new.url
+            FROM new LEFT JOIN Articles AS old ON new.title = old.title;
+    '''
+    cur.execute(statement, (author_id, values[1], values[2], region_id, tag_id, values[5]))
+    
+    # conn.commit()
+    # conn.close()
 
 # REQUIRES: input is a dictionary for a single article
 # MODIFIES: the DBNAME
 # EFFECTS: adds information to the cache
 # DEPENDENCIES: nothing
-def selenium_cache(url):
+def selenium_cache(url, driver, cur):
     # Connect to the DBNAME
-    conn = sqlite.connect(DBNAME)
-    cur = conn.cursor()
+    # conn = sqlite.connect(DBNAME)
+    # cur = conn.cursor()
     
     statement = '''
         SELECT EXISTS(SELECT 1 FROM Cache WHERE url = ?)
@@ -98,10 +134,10 @@ def selenium_cache(url):
         html = cur.fetchone()[0]
     else:
         # Launch url
-        driver = webdriver.Chrome('./final_project/chromedriver-Windows')
+        # driver = webdriver.Chrome('./final_project/chromedriver-Windows')
         driver.get(url)
         html = driver.page_source
-        driver.quit()
+        # driver.quit()
         
         # Add to cache
         statement = '''
@@ -109,8 +145,8 @@ def selenium_cache(url):
         '''
         cur.execute(statement, (url, html))
         
-    conn.commit()
-    conn.close()    
+    # conn.commit()
+    # conn.close()    
     
     return html
 
@@ -118,31 +154,37 @@ def selenium_cache(url):
 # MODIFIES: nothing
 # EFFECTS: returns formatted information for db insertions
 # DEPENDENCIES: selenium_cache
-def scrape_page(url):  
-    soup = BeautifulSoup(selenium_cache(url), 'html.parser')
+def scrape_page(url, driver, cur):  
+    soup = BeautifulSoup(selenium_cache(url, driver, url), 'html.parser')
     
     # Date published
     try:
         date = soup.find('div', {'class': 'date date--v2 relative-time'})['data-datetime']
     except:
-        date = 'N/A'
+        date = 'Unknown'
+    # HTML why
+    if date is None:
+        date = 'Unknown'
     
     # Region
     try:
         region = soup.find('div', {'class': 'secondary-navigation secondary-navigation--wide'}).find('span').text
     except:
         region = 'Unknown'
+    # HTML why
+    if region is None:
+        region = 'Unknown'
     
     # Find tags
-    tags = []
     try:
-        tags_temp = soup.find_all('li', {'class': 'tags-list__tags', 'data-entityid': 'topic_link_top'})
-        for tag in tags_temp:
-            tags.append(tag.find('a').text)
+        tag = soup.find('li', {'class': 'tags-list__tags', 'data-entityid': 'topic_link_top'})
     except:
-        pass
+        tag = 'Unknown'
+    # HTML why
+    if tag is None:
+        tag = 'Unknown'
     
-    return (date, region, tags)
+    return (date, region, tag)
     
     
 if __name__ == '__main__':

@@ -95,7 +95,7 @@ def pop_tables():
     statement = '''
         INSERT INTO Tags (tag) VALUES (?)
     '''
-    cur.execute(statement, ('None',))
+    cur.execute(statement, ('Unknown',))
     
     statement = '''
         INSERT INTO Regions (region) VALUES (?)
