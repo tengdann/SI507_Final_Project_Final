@@ -45,6 +45,7 @@ def get_from_api(baseurl, params):
     cur = conn.cursor()
     
     articles = json.loads(requests.get(generate_url(baseurl, params)).text)
+    print(len(articles['articles']))
 
     for article in articles['articles']:
         # We only want news articles; sports pages are formatted differently
