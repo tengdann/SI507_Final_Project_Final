@@ -6,8 +6,11 @@ from bs4 import BeautifulSoup
 import re
 import os
 import sqlite3 as sqlite
+import sys
 from secrets import news_api_key
 from database import DBNAME
+
+sys.stdout.flush()
 
 api_key = news_api_key
 api_baseurl = 'https://newsapi.org/v2/everything?'
@@ -33,37 +36,37 @@ def generate_url(baseurl, params):
 # MODIFIES: the DBNAME
 # EFFECTS: gets articles from specified website utilizing the cache
 # DEPENDENCIES: generate_url(), add_to_db(), scrape_page
-def get_from_api(baseurl, params):
-    print('WARNING: THIS WILL DO A NEW QUERY TO THE API')
-    print('OTHERWISE THERE WOULD BE NO UPDATED STORIES')
-    
+def get_from_api(baseurl, params):    
     # Selenium stuff
-    driver = webdriver.Chrome('./final_project/chromedriver-Windows')
+    # Don't load images?
+    chromeOptions = webdriver.ChromeOptions()
+    prefs = {'profile.managed_default_content_settings.images':2}
+    chromeOptions.add_experimental_option("prefs", prefs)
+    
+    driver = webdriver.Chrome('./final_project/chromedriver-Windows', options = chromeOptions)
+    
+    # To prevent Selenium from stalling out occasionally
+    driver.set_page_load_timeout(15)
     
     # SQLite stuff
     conn = sqlite.connect(DBNAME)
     cur = conn.cursor()
     
     articles = json.loads(requests.get(generate_url(baseurl, params)).text)
-    print(len(articles['articles']))
 
     for article in articles['articles']:
         # We only want news articles; sports pages are formatted differently
-        if 'news' in article['url']:
-            page_stuff = scrape_page(article['url'], driver, cur)
-            
-            # Get author from API; if facebook link set to Unknown'
-            author = 'Unknown'
-            if 'facebook' not in article['author'] and article['author'] is not None:
-                author = article['author']
-                
+        # We also ignore videos, since Selenium might stall out while loading video
+        if 'news' in article['url'] and 'av' not in article['url']:
+            page_stuff = scrape_page(article['url'], driver, cur)              
+            author = page_stuff[0].replace('By ', '')
             title = article['title']
             url = article['url']
             
-        to_insert = (author, title, page_stuff[0], page_stuff[1], page_stuff[2], url)
-        add_to_db(to_insert, cur)
-        
-        conn.commit()
+            to_insert = (author, title, page_stuff[1], page_stuff[2], page_stuff[3], url)
+            add_to_db(to_insert, cur)
+            
+            conn.commit()
         
     conn.close()
     driver.quit()
@@ -73,9 +76,6 @@ def get_from_api(baseurl, params):
 # EFFECTS: adds information to the database
 # DEPENDENCIES: nothing 
 def add_to_db(values, cur):
-    # conn = sqlite.connect(DBNAME)
-    # cur = conn.cursor()
-    
     # Insert and get author_id
     statement = '''
         INSERT OR IGNORE INTO Authors (author) VALUES (?);
@@ -113,6 +113,7 @@ def add_to_db(values, cur):
     tag_id = cur.fetchone()[0]
     
     # Insert or replace into article
+    # Since UPSERT isn't available for this SQLite3 version, gotta use this convoluted way
     statement = '''
         WITH new (author_id, title, [date], region_id, tag_id, url) AS ( VALUES(?, ?, ?, ?, ?, ?) )
             INSERT OR REPLACE INTO Articles (id, author_id, title, [date], region_id, tag_id, url)
@@ -120,19 +121,12 @@ def add_to_db(values, cur):
             FROM new LEFT JOIN Articles AS old ON new.title = old.title;
     '''
     cur.execute(statement, (author_id, values[1], values[2], region_id, tag_id, values[5]))
-    
-    # conn.commit()
-    # conn.close()
 
 # REQUIRES: input is a dictionary for a single article
 # MODIFIES: the DBNAME
 # EFFECTS: adds information to the cache
 # DEPENDENCIES: nothing
 def selenium_cache(url, driver, cur):
-    # Connect to the DBNAME
-    # conn = sqlite.connect(DBNAME)
-    # cur = conn.cursor()
-    
     statement = '''
         SELECT EXISTS(SELECT 1 FROM Cache WHERE url = ?)
     '''
@@ -146,21 +140,21 @@ def selenium_cache(url, driver, cur):
         cur.execute(statement, (url,))
         html = cur.fetchone()[0]
     else:
-        # Launch url
-        # driver = webdriver.Chrome('./final_project/chromedriver-Windows')
-        driver.get(url)
+        finished = 0
+        while finished == 0:
+            try:
+                driver.get(url)
+                finished = 1
+            except:
+                sleep(5)
         html = driver.page_source
-        # driver.quit()
         
         # Add to cache
         statement = '''
             INSERT INTO Cache (url, html) VALUES (?, ?)
         '''
         cur.execute(statement, (url, html))
-        
-    # conn.commit()
-    # conn.close()    
-    
+
     return html
 
 # REQUIRES: url to an article
@@ -169,6 +163,12 @@ def selenium_cache(url, driver, cur):
 # DEPENDENCIES: selenium_cache
 def scrape_page(url, driver, cur):  
     soup = BeautifulSoup(selenium_cache(url, driver, cur), 'html.parser')
+    
+    # Author?
+    try:
+        author = soup.find('div', {'class': 'byline'}).find('span', {'class': 'byline__name'}).text
+    except:
+        author = 'BBC News'
     
     # Date published
     try:
@@ -192,15 +192,32 @@ def scrape_page(url, driver, cur):
     try:
         tag = soup.find('li', {'class': 'tags-list__tags', 'data-entityid': 'topic_link_top'}).find('a').text
     except:
-        tag = 'Unknown'
+        try:
+            tag = soup.find('li', {'class': 'tags-list__tags', 'data-entityid': 'topic_link_bottom'}).find('a').text
+        except:
+            tag = 'Unknown'
     # HTML why
     if tag is None:
         tag = 'Unknown'
     
-    return (date, region, tag)
+    return (author, date, region, tag)
     
     
 if __name__ == '__main__':
-    params = {'sources': 'bbc-news', 'apiKey': api_key, 'pageSize': '100'}
-    get_from_api(api_baseurl, params)
-    print('Data successfully scraped!')
+    print('WARNING: THIS WILL DO A NEW QUERY TO THE API')
+    print('OTHERWISE THERE WOULD BE NO UPDATED STORIES')
+    
+    try:
+        user_input = int(input('Please enter how many pages you would like to scrape: '))
+    except:
+        print('Error, you need to enter a number!')
+        sys.exit(1)
+        
+    for i in range(1, user_input + 1):
+        try:
+            params = {'sources': 'bbc-news', 'apiKey': api_key, 'pageSize': '100', 'page': str(i)}
+            get_from_api(api_baseurl, params)
+            print('Data successfully scraped!', 'Page {} of {}'.format(i, user_input))
+        except:
+            print('Something went wrong; you\'ve probably reached the end of the API call!')
+            sys.exit(1)

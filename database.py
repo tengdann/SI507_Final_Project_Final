@@ -111,7 +111,14 @@ def pop_tables():
     conn.close()
 
 if __name__ == '__main__':
-    create_tables()
-    print('Tables re-created successfully!')
-    pop_tables()
-    print('Null values established!')
+    print('WARNING: RUNNING THIS WILL ERASE ALL TABLES!')
+    print('ANY DATA YOU HAD WILL BE DELETED!')
+    
+    user_input = input('Do you want to continue (y/n)?: ')
+    if user_input.lower() == 'y':
+        create_tables()
+        print('Tables re-created successfully!')
+        pop_tables()
+        print('Null values established!')
+    elif user_input.lower() != 'n':
+        print('Response not recognized, bye!')
