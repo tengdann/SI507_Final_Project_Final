@@ -201,6 +201,6 @@ def scrape_page(url, driver, cur):
     
     
 if __name__ == '__main__':
-    params = {'sources': 'bbc-news', 'apiKey': api_key}
+    params = {'sources': 'bbc-news', 'apiKey': api_key, 'pageSize': '100'}
     get_from_api(api_baseurl, params)
     print('Data successfully scraped!')
