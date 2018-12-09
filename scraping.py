@@ -15,8 +15,8 @@ sys.stdout.flush()
 api_key = news_api_key
 api_baseurl = 'https://newsapi.org/v2/everything?'
 
-test_url1 = 'https://www.bbc.com/news/uk-england-bristol-46420317'
-test_url2 = 'https://www.bbc.com/news/world-us-canada-46421177'
+test_url1 = 'https://www.bbc.co.uk/news/technology-46442029'
+test_url2 = 'https://www.bbc.co.uk/news/world-us-canada-46438116'
 
 # REQUIRES: api_baseurl is a valid API url, and params is a dictionary w/ valid key/value pairs for said API
 # MODIFIES: nothing
