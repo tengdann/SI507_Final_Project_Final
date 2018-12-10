@@ -1,4 +1,40 @@
-<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/index_style.css">
 
-<h1> Welcome to my Final Project </h1>
-<h2> On this page, you will see a table of articles </h2>
+<h1> SI 507 Final Project </h1>
+<h2> 
+    On this page, you will see a table of <a href = "#jumpHere">articles</a> </br>
+    You can also go to <a href = "/plotly">plotly</a> stuff
+</h2>
+
+
+<form action = "/" method = "POST">
+    Sort By: <br/>
+        <input type = "radio" name = "sortby" value = "title"/> Title <br/>
+        <input type = "radio" name = "sortby" value = "author"/> Author <br/>
+        <input type = "radio" name = "sortby" value = "date"/> Published <br/>
+    <br/>
+    Sort Order: <br/>
+        <input type = "radio" name = "sortorder" value = "asc"/> Ascending <br/>
+        <input type = "radio" name = "sortorder" value = "desc"/> Descending <br/>
+    <br/>        
+    <input type = "submit" name = "update" value = "Update"/> <br/><br/>
+</form>
+
+<table border = 1 id = "jumpHere">
+    <tr>
+        <th> Title </th>
+        <th> Author </th>
+        <th> Date Published </th>
+        <th> Link </th>
+    </tr>
+{% for article in articles %}
+    <tr>
+        <td class = "Title"> {{article[1]}} </td>
+        <td class = "Author"> {{article[0]}} </td>
+        <td class = "Published"> {{article[2]}} </td>
+        <td class = "URL"> <a href = {{article[5]}} target = "_blank"> {{article[5]}} </a> </td>
+    </tr>
+{% endfor %}
+</table>
+
+<p><a href = "#jumpHere">Top of Table</a></p>

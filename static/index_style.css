@@ -1,0 +1,25 @@
+h1 {
+    text-align: center;
+}
+
+body {
+    background-color: rgb(230, 230, 230);
+}
+
+form {
+    font-size: 22px;
+}
+
+p {
+    font-size: 20px;
+}
+
+table, th, td {
+    border-width: 0.5;
+    border-collapse: collapse;
+    padding: 10;
+}
+
+tr:hover{
+    background-color: rgb(235, 235, 235);
+}

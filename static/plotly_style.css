@@ -1,0 +1,89 @@
+h1{
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+}
+
+body {
+    background-color: rgb(220, 220, 220);
+}
+
+table, th, td {
+    border-width: 0.5;
+    border-collapse: collapse;
+    padding: 10;
+}
+
+table.Tags {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table.Regions {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+tr:hover{
+    background-color: rgb(235, 235, 235);
+}
+
+#div_tags {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+}
+
+.Tags {
+    width: 33%;
+    text-align: center;
+    margin-right: 5px;
+    flex: 1;
+}
+
+.chart1p {
+    width: 33%;
+    margin-left: 5px;
+    margin-right: 5px;
+    flex: 2;    
+}
+
+.chart1b {
+    width: 33%;
+    margin-left: 5px;
+    margin-right: 5px;
+    flex: 3;
+}
+
+#div_regions {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+}
+
+.Regions {
+    width: 33%;
+    text-align: center;
+    margin-right: 5px;
+    flex: 1;
+}
+
+.chart2p {
+    width: 33%;
+    margin-left: 5px;
+    margin-right: 5px;
+    flex: 2;
+}
+
+.chart2b {
+    width: 33%
+    margin-left: 5px;
+    margin-right: 5px;
+    flex: 3;
+}
