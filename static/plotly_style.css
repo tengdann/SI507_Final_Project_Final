@@ -16,16 +16,6 @@ table, th, td {
     padding: 10;
 }
 
-table.Tags {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-table.Regions {
-    margin-left: auto;
-    margin-right: auto;
-}
-
 tr:hover{
     background-color: rgb(235, 235, 235);
 }
@@ -36,27 +26,27 @@ tr:hover{
     justify-content: center;
     align-items: center;
     align-content: center;
+    margin-left: 60px;
+    margin-right: 60px;
+    padding-bottom: 50px;
 }
 
 .Tags {
-    width: 33%;
     text-align: center;
-    margin-right: 5px;
-    flex: 1;
+    background-color: white;
+    margin-left: auto;
+    margin-right: auto;
+    width: 200px;
 }
 
 .chart1p {
-    width: 33%;
-    margin-left: 5px;
-    margin-right: 5px;
-    flex: 2;    
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .chart1b {
-    width: 33%;
-    margin-left: 5px;
-    margin-right: 5px;
-    flex: 3;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #div_regions {
@@ -65,25 +55,24 @@ tr:hover{
     justify-content: center;
     align-items: center;
     align-content: center;
+    margin-left: 60px;
+    margin-right: 60px;
 }
 
 .Regions {
-    width: 33%;
     text-align: center;
-    margin-right: 5px;
-    flex: 1;
+    background-color: white;
+    margin-left: auto;
+    margin-right: auto;
+    width: 200px;
 }
 
 .chart2p {
-    width: 33%;
-    margin-left: 5px;
-    margin-right: 5px;
-    flex: 2;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .chart2b {
-    width: 33%
-    margin-left: 5px;
-    margin-right: 5px;
-    flex: 3;
+    margin-left: auto;
+    margin-right: auto;
 }
