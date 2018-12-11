@@ -15,7 +15,7 @@
             </tr>
         {% for tag in tags %}
             <tr>
-                <td class = "Tag"> {{tag[0]}} </td>
+                <td class = "Tag"> <a href = "/{{tag[0]}}">{{tag[0]}}</a> </td>
                 <td class = "Tag_Freq"> {{tag[1]}} </td>
             </tr>
         {% endfor %}
@@ -47,7 +47,7 @@
             </tr>
         {% for region in regions %}
             <tr>
-                <td class = "Region"> {{region[0]}} </td>
+                <td class = "Region"> <a href = "/{{region[0]}}">{{region[0]}}</a> </td>
                 <td class = "Reg_Freq"> {{region[1]}} </td>
             </tr>
         {% endfor %}

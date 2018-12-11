@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="/static/regions_style.css">
+
+<h1> SI507 Final Project </h1>
+<h1> BROKEN DO NOT USE </h1>
+<h2> Articles for {{region}} </h2>
+<div class = "table">
+    <table border = 1>
+        <tr>
+            <th> Title </th>
+            <th> Author </th>
+            <th> Date Published </th>
+            <th> Link </th>
+        </tr>
+    {% for article in articles %}
+        <tr>
+            <td class = "Title"> {{article[1]}} </td>
+            <td class = "Author"> {{article[0]}} </td>
+            <td class = "Published"> {{article[2]}} </td>
+            <td class = "URL"> <a href = "{{article[3]}}" target = "_blank"> {{article[3]}} </a> </td>
+        </tr>
+    {% endfor %}
+    </table>
+</div>
+
+{% for article in articles %}
+    <p> {{article}} </p>
+{% endfor %}

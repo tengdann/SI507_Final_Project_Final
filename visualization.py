@@ -23,14 +23,16 @@ def plotly():
     regions = get_regions()
     return render_template('plotly.html', tags = tags, regions = regions, graphPie1 = graph_pie(tags), graphPie2 = graph_pie(regions), graphBar1 = graph_bar(tags), graphBar2 = graph_bar(regions))
     
-def vi_main():
-    user_input = input("Would you like to run Flask with debug enabled (y/n)?: ")
-    if user_input.lower() == 'y':
-        app.debug = True
-    else:
-        app.debug = False
+@app.route("/<tag>")
+def tags(tag):
+    return render_template('tags.html', tag = tag, articles = specific_tags(tag))
     
-    app.run()
+@app.route("/<region>")
+def regions(region):
+    return render_template('regions.html', region = region, articles = specific_regions(region))
+    
+def vi_main():    
+    app.run(debug = True)
     
 if __name__ == '__main__':
     vi_main()

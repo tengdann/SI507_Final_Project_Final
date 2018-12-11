@@ -24,6 +24,7 @@ def get_articles(sortby = 'Articles.id', sortorder = 'asc'):
     '''.format(sortby, sortorder)
     cur.execute(statement)
     articles = cur.fetchall()
+    conn.close()
     
     return articles
     
@@ -43,6 +44,7 @@ def get_tags():
     '''
     cur.execute(statement)
     tags = cur.fetchall()
+    conn.close()
     
     return tags
     
@@ -62,6 +64,7 @@ def get_regions():
     '''
     cur.execute(statement)
     regions = cur.fetchall()
+    conn.close()
     
     return regions
     
@@ -86,3 +89,37 @@ def graph_bar(items):
     
     graphJSON = json.dumps(object, cls = plotly.utils.PlotlyJSONEncoder)
     return graphJSON
+    
+def specific_tags(tag):
+    conn = sqlite.connect(DBNAME)
+    cur = conn.cursor()
+    
+    statement = '''SELECT Authors.author, title, date, url FROM Articles
+        JOIN Tags
+        ON tag_id = Tags.id
+        JOIN Authors
+        ON author_id = Authors.id
+    WHERE Tags.tag = ?
+    '''
+    cur.execute(statement, (tag,))
+    articles = cur.fetchall()
+    conn.close()
+    
+    return articles
+    
+def specific_regions(region):
+    conn = sqlite.connect(DBNAME)
+    cur = conn.cursor()
+    
+    statement = '''SELECT Authors.author, title, date, url FROM Articles
+        JOIN Regions
+        ON region_id = Regions.id
+        JOIN Authors
+        ON author_id = Authors.id
+    WHERE Regions.region = ?
+    '''
+    cur.execute(statement, (region,))
+    articles = cur.fetchall()
+    conn.close()
+    
+    return articles
