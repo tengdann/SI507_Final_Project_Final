@@ -23,16 +23,16 @@ def plotly():
     regions = get_regions()
     return render_template('plotly.html', tags = tags, regions = regions, graphPie1 = graph_pie(tags), graphPie2 = graph_pie(regions), graphBar1 = graph_bar(tags), graphBar2 = graph_bar(regions))
     
-@app.route("/<tag>")
+@app.route("/tag/<tag>")
 def tags(tag):
     return render_template('tags.html', tag = tag, articles = specific_tags(tag))
     
-@app.route("/<region>")
+@app.route("/region/<region>")
 def regions(region):
     return render_template('regions.html', region = region, articles = specific_regions(region))
     
-def vi_main():    
-    app.run(debug = True)
+def vi_main(): 
+    app.run(debug = False)
     
 if __name__ == '__main__':
     vi_main()
