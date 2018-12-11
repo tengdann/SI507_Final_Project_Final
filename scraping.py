@@ -46,7 +46,7 @@ def get_from_api(baseurl, params):
     driver = webdriver.Chrome('./final_project/chromedriver-Windows', options = chromeOptions)
     
     # To prevent Selenium from stalling out occasionally
-    driver.set_page_load_timeout(15)
+    driver.set_page_load_timeout(20)
     
     # SQLite stuff
     conn = sqlite.connect(DBNAME)
@@ -206,15 +206,23 @@ def sc_main():
     print('WARNING: THIS WILL DO A NEW QUERY TO THE API')
     print('OTHERWISE THERE WOULD BE NO UPDATED STORIES')
     
-    try:
-        user_input = int(input('Please enter how many pages you would like to scrape: '))
-    except:
-        print('Error, you need to enter a number!')
-        sys.exit(1)
+    while True:
+        try:
+            user_input = int(input('Please enter how many pages you would like to scrape: '))
+            break
+        except:
+            print('Error, you need to enter a number!')
+            
+    while True:
+        try:
+            per_page = int(input('Please enter how many results you would like per page: '))
+            break
+        except:
+            print('Error, you need to enter a number!')
         
     for i in range(1, user_input + 1):
         try:
-            params = {'sources': 'bbc-news', 'apiKey': api_key, 'pageSize': '100', 'page': str(i)}
+            params = {'sources': 'bbc-news', 'apiKey': api_key, 'pageSize': str(per_page), 'page': str(i)}
             get_from_api(api_baseurl, params)
             print('Data successfully scraped!', 'Page {} of {}'.format(i, user_input))
         except:
