@@ -97,5 +97,8 @@ class TestDatabase(unittest.TestCase):
         conn.close()
         
         
-        
-unittest.main()
+def te_main():        
+    unittest.main()
+    
+if __name__ == '__main__':
+    te_main()

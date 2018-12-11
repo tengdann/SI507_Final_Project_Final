@@ -202,8 +202,7 @@ def scrape_page(url, driver, cur):
     
     return (author, date, region, tag)
     
-    
-if __name__ == '__main__':
+def sc_main():
     print('WARNING: THIS WILL DO A NEW QUERY TO THE API')
     print('OTHERWISE THERE WOULD BE NO UPDATED STORIES')
     
@@ -221,3 +220,6 @@ if __name__ == '__main__':
         except:
             print('Something went wrong; you\'ve probably reached the end of the API call!')
             sys.exit(1)
+    
+if __name__ == '__main__':
+    sc_main()

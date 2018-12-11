@@ -110,7 +110,7 @@ def pop_tables():
     conn.commit()
     conn.close()
 
-if __name__ == '__main__':
+def db_main():
     print('WARNING: RUNNING THIS WILL ERASE ALL TABLES!')
     print('ANY DATA YOU HAD WILL BE DELETED!')
     
@@ -122,3 +122,6 @@ if __name__ == '__main__':
         print('Null values established!')
     elif user_input.lower() != 'n':
         print('Response not recognized, bye!')
+    
+if __name__ == '__main__':
+    db_main()

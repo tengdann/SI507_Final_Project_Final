@@ -70,7 +70,7 @@ def graph_pie(items):
     values = [item[1] for item in items]
     trace = go.Pie(labels = labels, values = values)
     
-    layout = go.Layout(width = 600, height = 500)
+    layout = go.Layout(width = 600, height = 550)
     object = go.Figure(data = [trace], layout = layout)
     
     graphJSON = json.dumps(object, cls = plotly.utils.PlotlyJSONEncoder)
@@ -81,7 +81,7 @@ def graph_bar(items):
     values = [item[1] for item in items]
     trace = go.Bar(x = labels, y = values)
     
-    layout = go.Layout(width = 800, height = 500)
+    layout = go.Layout(width = 800, height = 550)
     object = go.Figure(data = [trace], layout = layout)
     
     graphJSON = json.dumps(object, cls = plotly.utils.PlotlyJSONEncoder)
